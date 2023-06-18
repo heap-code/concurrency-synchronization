@@ -27,6 +27,8 @@ interface QueueItem {
 /**
  * A semaphore to manage "concurrency in Javascript" (as mentioned in the mozilla documentation).
  *
+ * The queue is a simple FIFO (First In, First Out).
+ *
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#promise_concurrency
  */
 export class Semaphore implements Synchronizer {
