@@ -3,7 +3,7 @@
 		"declaration": false,
 		"skipLibCheck": true
 	},
-	"exclude": ["jest.config.ts", "src/**/*.spec.ts"],
+	"exclude": ["jest.config.ts", "src/**/*.spec.ts", "support/**/*.ts"],
 	"extends": "./tsconfig.json",
 	"include": ["src/**/*.ts"]
 }

@@ -3,5 +3,5 @@
 		"types": ["jest", "jest-extended", "node"]
 	},
 	"extends": "./tsconfig.json",
-	"include": ["jest.config.ts", "src/**/*.spec.ts"]
+	"include": ["jest.config.ts", "src/**/*.spec.ts", "support/**/*.ts"]
 }
