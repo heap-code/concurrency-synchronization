@@ -1,0 +1,8 @@
+{
+	"compilerOptions": {
+		"module": "ES2015",
+		"outDir": "../../dist/esm5",
+		"target": "ES5"
+	},
+	"extends": "../../tsconfig.build.json"
+}

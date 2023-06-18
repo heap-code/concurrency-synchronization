@@ -1,0 +1,7 @@
+# ignore all by default
+/*
+
+# Add the bundles amd the badges (for the README)
+!/dist
+!/.badges
+

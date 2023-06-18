@@ -1,0 +1,23 @@
+{
+	"arrowParens": "avoid",
+	"overrides": [
+		{
+			"files": "*.md",
+			"options": {
+				"parser": "markdown"
+			}
+		},
+		{
+			"files": "*.yml",
+			"options": {
+				"parser": "yaml",
+				"tabWidth": 2
+			}
+		}
+	],
+	"semi": true,
+	"singleQuote": false,
+	"tabWidth": 4,
+	"trailingComma": "none",
+	"useTabs": true
+}

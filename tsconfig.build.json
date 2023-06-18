@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"declaration": false,
+		"skipLibCheck": true
+	},
+	"exclude": ["jest.config.ts", "src/**/*.spec.ts"],
+	"extends": "./tsconfig.json",
+	"include": ["src/**/*.ts"]
+}
