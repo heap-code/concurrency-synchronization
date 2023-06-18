@@ -54,6 +54,22 @@ describe("Semaphore", () => {
 				expect(() => semaphore.release(permits)).toThrow(SemaphoreInvalidPermitsException);
 			}
 		});
+
+		it("should throw a permit exception when releasing all and setting negative permits", () => {
+			for (const permits of [-1, -10, -100]) {
+				expect(() => semaphore.releaseAll(permits)).toThrow(
+					SemaphoreInvalidPermitsException
+				);
+			}
+		});
+
+		it("should throw a permit exception when interrupting and setting negative permits", () => {
+			for (const permits of [-1, -10, -100]) {
+				expect(() => semaphore.interrupt("test", permits)).toThrow(
+					SemaphoreInvalidPermitsException
+				);
+			}
+		});
 	});
 
 	describe("`acquire` usage", () => {
@@ -62,7 +78,7 @@ describe("Semaphore", () => {
 
 		it("should work with a single initial permit", async () => {
 			// semaphore as a mutex
-			const semaphore = new Semaphore(1);
+			const semaphore = new Semaphore();
 
 			// Immediate acquire
 			expect(semaphore.permitsAvailable).toBe(1);
@@ -187,6 +203,18 @@ describe("Semaphore", () => {
 			}
 		});
 
+		it("should immediately acquire when there is enough permits", async () => {
+			const semaphore = new Semaphore(10);
+
+			const [elapsed1] = await timeFunction(() => semaphore.tryAcquire(1, 2));
+			const [elapsed2] = await timeFunction(() =>
+				semaphore.tryAcquire(1, semaphore.permitsAvailable)
+			);
+
+			expect(elapsed1).toBeLessThanOrEqual(2 * offset);
+			expect(elapsed2).toBeLessThanOrEqual(2 * offset);
+		});
+
 		it("should thrown an error when the time exceeds", async () => {
 			const semaphore = new Semaphore(0);
 
@@ -245,6 +273,16 @@ describe("Semaphore", () => {
 
 		expect(semaphore.permitsAvailable).toBe(4);
 		expect(semaphore.queueLength).toBe(0);
+
+		// Same but without permits
+		setTimeout(() => {
+			semaphore.releaseAll();
+		}, delay);
+
+		await Promise.all([semaphore.acquire(5), semaphore.acquire(5)]);
+
+		expect(semaphore.permitsAvailable).toBe(0);
+		expect(semaphore.queueLength).toBe(0);
 	});
 
 	it("should interrupt all", async () => {
@@ -270,6 +308,16 @@ describe("Semaphore", () => {
 		}
 
 		expect(semaphore.permitsAvailable).toBe(3);
+		expect(semaphore.queueLength).toBe(0);
+
+		// Same but without permits
+		setTimeout(() => {
+			semaphore.interrupt(reason);
+		}, delay);
+
+		await Promise.all([semaphore.acquire(5), semaphore.acquire(5)]).catch(() => void 0);
+
+		expect(semaphore.permitsAvailable).toBe(0);
 		expect(semaphore.queueLength).toBe(0);
 	});
 });

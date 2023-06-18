@@ -38,7 +38,7 @@ export class Semaphore {
 	 * @returns the current number of available permits
 	 */
 	public get permitsAvailable() {
-		return this.permits < 0 ? 0 : this.permits;
+		return this.permits;
 	}
 
 	/**
@@ -245,14 +245,12 @@ export class Semaphore {
 		return new Promise<void>((resolve, reject) => {
 			const resolvers: Resolver[] = [];
 
-			Promise.all(
+			// `void` as none of the promises use `reject`
+			void Promise.all(
 				Array(permits)
 					.fill(null)
 					.map(() => new Promise<void>(resolve => resolvers.push(resolve)))
-			)
-				.then(() => resolve())
-				// Just in case
-				.catch((err: unknown) => reject(err));
+			).then(() => resolve());
 
 			const item: QueueItem = { reject, resolvers };
 			// Add to the queue.
