@@ -4,6 +4,7 @@ import {
 	ConcurrencyInvalidTimeoutException
 } from "../exceptions";
 import { ConcurrencyInterruptedException } from "../exceptions";
+import { Synchronizer } from "../synchronizer.interface";
 
 type Resolver = () => void;
 
@@ -28,7 +29,7 @@ interface QueueItem {
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#promise_concurrency
  */
-export class Semaphore {
+export class Semaphore implements Synchronizer {
 	/**
 	 * Queue of the "threads"
 	 */

@@ -150,9 +150,9 @@ describe("Semaphore", () => {
 			const med = delay;
 			const max = delay * 2;
 
-			setTimeout(() => semaphore.release(), delay);
-			setTimeout(() => semaphore.release(), delay / 2);
-			setTimeout(() => semaphore.release(), delay * 2);
+			setTimeout(() => semaphore.release(), med);
+			setTimeout(() => semaphore.release(), min);
+			setTimeout(() => semaphore.release(), max);
 
 			// global elapsed of the operation and the times of the individual acquires
 			const [elapsed, times] = await timeFunction(() =>
