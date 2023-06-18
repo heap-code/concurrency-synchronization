@@ -1,8 +1,8 @@
+import { SemaphoreInvalidPermitsException } from "./exceptions";
 import {
-	SemaphoreAcquireTimeoutException,
-	SemaphoreInvalidPermitsException,
-	SemaphoreInvalidTimeoutException
-} from "./exceptions";
+	ConcurrencyExceedTimeoutException,
+	ConcurrencyInvalidTimeoutException
+} from "../exceptions";
 import { ConcurrencyInterruptedException } from "../exceptions";
 
 type Resolver = () => void;
@@ -107,14 +107,14 @@ export class Semaphore {
 	 *
 	 * @param timeout maximum time (in ms) to acquire the permits
 	 * @param permits The number of permits to acquire (0 acquire immediately)
-	 * @throws {SemaphoreAcquireTimeoutException} when the `timeout` value is invalid
+	 * @throws {ConcurrencyExceedTimeoutException} when the `timeout` value is invalid
 	 * @throws {SemaphoreInvalidPermitsException} when the `permits` value is invalid
 	 * @returns a promise when the permits have been acquired
 	 */
 	public tryAcquire(timeout: number, permits = 1): Promise<void> {
 		if (timeout < 0) {
 			return Promise.reject(
-				new SemaphoreInvalidTimeoutException("Cannot acquire with a negative timeout")
+				new ConcurrencyInvalidTimeoutException("Cannot acquire with a negative timeout")
 			);
 		}
 		if (permits < 0) {
@@ -150,7 +150,7 @@ export class Semaphore {
 				}
 
 				reject(
-					new SemaphoreAcquireTimeoutException(
+					new ConcurrencyExceedTimeoutException(
 						`Timeout of ${timeout}ms exceed when acquiring.`
 					)
 				);

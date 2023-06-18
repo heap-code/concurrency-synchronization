@@ -1,11 +1,9 @@
-import {
-	SemaphoreAcquireTimeoutException,
-	SemaphoreInvalidPermitsException,
-	SemaphoreInvalidTimeoutException
-} from "./exceptions";
+import { SemaphoreInvalidPermitsException } from "./exceptions";
 import { Semaphore } from "./semaphore";
 import { timeFunction } from "../../support/time-function";
 import { ConcurrencyInterruptedException } from "../exceptions";
+import { ConcurrencyExceedTimeoutException } from "../exceptions/concurrency.exceed-timeout.exception";
+import { ConcurrencyInvalidTimeoutException } from "../exceptions/concurrency.invalid-timeout.exception";
 
 describe("Semaphore", () => {
 	describe("Constructor", () => {
@@ -44,7 +42,7 @@ describe("Semaphore", () => {
 		it("should throw a timeout exception when try-acquiring negative timeout", async () => {
 			for (const timeout of [-1, -10, -100]) {
 				await expect(() => semaphore.tryAcquire(timeout)).rejects.toThrow(
-					SemaphoreInvalidTimeoutException
+					ConcurrencyInvalidTimeoutException
 				);
 			}
 		});
@@ -222,7 +220,7 @@ describe("Semaphore", () => {
 			setTimeout(() => expect(semaphore.queueLength).toBe(1), delay / 2);
 
 			await expect(() => semaphore.tryAcquire(delay)).rejects.toThrow(
-				SemaphoreAcquireTimeoutException
+				ConcurrencyExceedTimeoutException
 			);
 
 			// The queue is reset, since the `tryAcquire` failed
@@ -245,7 +243,7 @@ describe("Semaphore", () => {
 			}, delay / 2);
 
 			await expect(() => semaphore.tryAcquire(delay, 4)).rejects.toThrow(
-				SemaphoreAcquireTimeoutException
+				ConcurrencyExceedTimeoutException
 			);
 
 			// The queue is reset, since the `tryAcquire` failed (would have been cleared even on success)
