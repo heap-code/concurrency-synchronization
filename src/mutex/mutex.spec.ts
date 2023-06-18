@@ -30,6 +30,9 @@ describe("Mutex", () => {
 			expect(mutex.isLocked).toBeFalse();
 			expect(mutex.queueLength).toBe(0);
 
+			// Lock a first time
+			await mutex.lock();
+
 			const [elapsed] = await timeFunction(async () => {
 				setTimeout(() => {
 					expect(mutex.isLocked).toBeTrue();
@@ -49,6 +52,9 @@ describe("Mutex", () => {
 
 		it("should work with many lock", async () => {
 			const mutex = new Mutex();
+
+			// Lock a first time
+			await mutex.lock();
 
 			const min = delay / 2;
 			const med = delay;
@@ -113,6 +119,9 @@ describe("Mutex", () => {
 		it("should work with tryLock/unlock", async () => {
 			const mutex = new Mutex();
 
+			// Lock a first time
+			await mutex.lock();
+
 			const [elapsed] = await timeFunction(async () => {
 				setTimeout(() => mutex.unlock(), delay);
 				await mutex.tryLock(delay * 5);
@@ -124,6 +133,9 @@ describe("Mutex", () => {
 
 		it("should thrown an error when the time exceeds", async () => {
 			const mutex = new Mutex();
+
+			// Lock a first time
+			await mutex.lock();
 
 			setTimeout(() => {
 				expect(mutex.queueLength).toBe(1);
@@ -144,6 +156,9 @@ describe("Mutex", () => {
 		const delay = 100;
 		const mutex = new Mutex();
 		const reason = "test";
+
+		// Lock a first time
+		await mutex.lock();
 
 		setTimeout(() => {
 			expect(mutex.isLocked).toBeTrue();

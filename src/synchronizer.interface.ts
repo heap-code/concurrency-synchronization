@@ -1,3 +1,6 @@
+/**
+ * A synchronizer is an object or class that helps managing concurrency
+ */
 export interface Synchronizer {
 	/**
 	 * Interrupts all awaiting "Threads" with an [exception]{@link ConcurrencyInterruptedException}.
