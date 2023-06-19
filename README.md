@@ -32,6 +32,147 @@ npm i @heap-code/concurrency-synchronization
 
 ## Usages
 
+In the code examples, the `sleep` function is the following:
+
+```typescript
+function sleep(time: number) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
+```
+
+**This is a placeholder for any asynchronous task.**
+
+> **Note:**  
+> Avoid using this package on _"production"_ code.  
+> Go [here](#when-to-use) to understand why.
+
+### Mutex
+
+A mutex is a mechanism that enforces limits on access to a resource.
+It generally protects the access to shared variables.
+
+> Use [semaphores](#semaphore) for synchronization rather than a mutex.
+
+---
+
+With the given example:
+
+```typescript
+const myVar = { i: 0 };
+
+async function do1() {
+  await sleep(200);
+  myVar.i += 1;
+}
+
+async function do2() {
+  await sleep(50);
+  myVar.i *= 3;
+}
+
+async function bootstrap() {
+  await Promise.all([do1(), sleep(10).then(() => do2())]);
+  console.log(myVar.i); // => 1
+}
+bootstrap();
+```
+
+Even with the `sleep`, we could expect that `myVar.i += 1` is done
+before `myVar.i *= 3` as it is called before.  
+However `myVar.i` is not protected, then the final value is `1`.
+
+---
+
+If a mutex locks the task, then the variable is protected:
+
+```typescript
+const mutex = new Mutex();
+const myVar = { i: 0 };
+
+async function do1() {
+  await mutex.lock();
+
+  await sleep(200);
+  myVar.i += 1;
+
+  await mutex.unlock();
+}
+
+async function do2() {
+  await mutex.lock();
+
+  await sleep(50);
+  myVar.i *= 3;
+
+  await mutex.unlock();
+}
+
+async function bootstrap() {
+  await Promise.all([do1(), sleep(10).then(() => do2())]);
+  console.log(myVar.i); // => 3
+}
+bootstrap();
+```
+
+> From this [wikipedia section](https://en.wikipedia.org/wiki/Lock_(computer_science)#Mutexes_vs._semaphores):
+>
+> The task that locked the mutex is supposed to unlock it.
+
+#### Mutex tryLock
+
+It is possible to try to lock a mutex in a given time limit.  
+The function will then throw an exception if the mutex could not lock in time:
+
+```typescript
+mutex.tryLock(250).catch((error: unknown) => {
+  if (error instanceof ConcurrencyExceedTimeoutException) {
+    console.log("Could not lock in the given time.");
+  }
+
+  throw error;
+});
+```
+
+#### Mutex interrupt
+
+A mutex can be interrupted at any time.  
+All awaiting _"threads"_ will then receive an exception:
+
+```typescript
+const mutex = new Mutex();
+const myVar = { i: 0 };
+
+async function do1() {
+  await mutex.lock().catch((error: unknown) => {
+    if (error instanceof ConcurrencyInterruptedException) {
+      console.log("The mutex has been interrupted", error.getReason());
+    }
+
+    throw error;
+  });
+
+  await sleep(200);
+  myVar.i += 1;
+
+  await mutex.unlock();
+}
+
+async function bootstrap() {
+  await Promise.all([
+    do1(),
+    do1(),
+    sleep(20).then(() => mutex.interrupt({ message: "Take too much time" }))
+  ]);
+}
+bootstrap();
+```
+
+### Semaphore
+
+<!-- TODO -->
+
+## When to use
+
 <!-- TODO -->
 
 ## Releases
