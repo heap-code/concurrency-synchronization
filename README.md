@@ -169,7 +169,114 @@ bootstrap();
 
 ### Semaphore
 
-<!-- TODO -->
+From [wikipedia](https://en.wikipedia.org/wiki/Semaphore_(programming)):
+
+> Semaphores are a type of synchronization primitive.
+
+They can be used to protect certain resources (like mutexes),
+but are generally used for synchronization:
+
+```typescript
+async function bootstrap() {
+  const semaphore = new Semaphore(0);
+
+  const time1 = 100;
+  const time2 = 150;
+
+  sleep(time1).then(() => semaphore.release());
+  sleep(time2).then(() => semaphore.release());
+
+  const maxTime = Math.max(time1, time2);
+
+  const before = performance.now();
+  await semaphore.acquire(2); // waiting until releases
+  const after = performance.now();
+
+  const elapsed = after - before; // ~150
+  console.log("Done. took %dms with expected %dms", elapsed, maxTime);
+}
+bootstrap();
+```
+
+#### Semaphore tryAcquire
+
+It is possible to try to acquire a semaphore in a given time limit.  
+The function will then throw an exception if the semaphore could not acquire in time:
+
+ ```typescript
+async function bootstrap() {
+  const semaphore = new Semaphore(2);
+
+  const acquired1 = await semaphore.tryAcquire(100).then(() => true);
+  const acquired2 = await semaphore.tryAcquire(100, 2).catch((error: unknown) => {
+    if (error instanceof ConcurrencyExceedTimeoutException) {
+      return false;
+    }
+  
+    throw error;
+  });
+
+  console.log(acquired1); // true
+  console.log(acquired2); // false
+}
+bootstrap();
+```
+
+#### Semaphore interrupt
+
+A semaphore can be interrupted at any time.  
+All awaiting _"threads"_ will then receive an exception:
+
+ ```typescript
+async function bootstrap() {
+  const semaphore = new Semaphore(1);
+
+  void sleep(100).then(() => semaphore.interrupt({ code: 502 }, 2));
+
+  const succeed = await Promise.all([
+    semaphore.acquire(),
+    semaphore.acquire(2),
+    semaphore.tryAcquire(200),
+    semaphore.tryAcquire(200, 1)
+  ]).catch((error: unknown) => {
+    if (error instanceof ConcurrencyInterruptedException) {
+      return false;
+    }
+    throw error;
+  });
+
+  console.log(succeed); // false
+  console.log(semaphore.permitsAvailable); // 2
+}
+bootstrap();
+```
+
+#### Semaphore releaseAll
+
+Very similar to [interrupt](#semaphore-interrupt),
+but it does not throw an exception.
+
+ ```typescript
+async function bootstrap() {
+  const semaphore = new Semaphore(1);
+
+  void sleep(100).then(() => semaphore.releaseAll(3));
+
+  await Promise.all([
+    semaphore.acquire(),
+    semaphore.acquire(2),
+    semaphore.tryAcquire(200),
+    semaphore.tryAcquire(200, 1)
+  ]);
+ 
+  console.log("ok");
+  console.log(semaphore.permitsAvailable); // 3
+}
+bootstrap()
+```
+
+> **Note:**
+> Unless it is really desired, prefer [interrupt](#semaphore-interrupt) over `releaseAll`.
 
 ## When to use
 
