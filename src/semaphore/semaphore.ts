@@ -148,7 +148,6 @@ export class Semaphore implements Synchronizer {
 				// Removes the item form the queue
 				const index = this.queue.findIndex(i => i === item);
 				if (index >= 0) {
-					// TODO: prettier
 					this.queue.splice(index, 1);
 				}
 

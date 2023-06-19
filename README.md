@@ -280,7 +280,39 @@ bootstrap()
 
 ## When to use
 
-<!-- TODO -->
+This package can be useful when writing test and wanting to synchronize events.
+
+For example, the [RxJs observable](https://rxjs.dev/guide/observable) behavior slightly differs
+if it comes from _regular_ observable or [subjects](https://rxjs.dev/guide/subject).
+
+> [firstValueFrom](https://rxjs.dev/api/index/function/firstValueFrom) returns the value immediately.
+
+So this difference can be omitted with the following:
+
+<!-- TODO: producer-consumer example -->
+
+```typescript
+describe("My test", () => {
+  it("should work", async () => {
+    const semaphore = new Semaphore(0);
+    const subscription = myObservable.subscribe(() => semaphore.release());
+    // something that updates the observable
+ 
+    // Need to pass 2 times in the event
+    await semaphore.tryAcquire(500, 2);
+ 
+    expect(1).toBe(1);
+    subscription.unsubscribe()
+  });
+});
+```
+
+---
+
+**However**, these synchronizations are **generally** not wanted in production code as it is wanted to
+keep the javascript code as _"parallelized"_ as possible, to not block code branches.  
+Moreover, better solutions might exist for these problems,
+such as `firstValueFrom` and `lastValueFrom` for RxJs.
 
 ## Releases
 
