@@ -250,6 +250,47 @@ describe("Semaphore", () => {
 			expect(semaphore.queueLength).toBe(0);
 			expect(semaphore.permitsAvailable).toBe(3); // the release in the timeout
 		});
+
+		it("should release other `acquire` or `tryAcquire` when a `tryAcquire` fails", async () => {
+			const semaphore = new Semaphore(1);
+
+			setTimeout(() => {
+				expect(semaphore.permitsAvailable).toBe(0);
+				expect(semaphore.permitsRequired).toBe(5);
+				expect(semaphore.queueLength).toBe(2);
+				semaphore.release();
+				expect(semaphore.permitsRequired).toBe(4);
+				expect(semaphore.queueLength).toBe(2);
+			}, delay);
+
+			await Promise.all([
+				// second acquire in time
+				new Promise(resolve => setTimeout(resolve, 10)).then(() => semaphore.acquire(2)),
+
+				semaphore
+					.tryAcquire(delay * 2, 3)
+					.catch((error: unknown) => {
+						if (error instanceof ConcurrencyExceedTimeoutException) {
+							return;
+						}
+						throw error;
+					})
+					.finally(() => {
+						// The release in the `setTimeout` reduced the required permits
+						// of the second acquire to 1, so still 0 available
+						expect(semaphore.permitsAvailable).toBe(0);
+						expect(semaphore.permitsRequired).toBe(1);
+						expect(semaphore.queueLength).toBe(1);
+
+						setTimeout(() => semaphore.release(2), delay);
+					})
+			]);
+
+			// The state is reset: 2 permits released for a single successful acquire (+ the initial one)
+			expect(semaphore.permitsAvailable).toBe(1);
+			expect(semaphore.permitsRequired).toBe(0);
+			expect(semaphore.queueLength).toBe(0);
+		});
 	});
 
 	it("should release all", async () => {
