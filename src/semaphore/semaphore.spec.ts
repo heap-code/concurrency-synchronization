@@ -72,7 +72,7 @@ describe("Semaphore", () => {
 
 	describe("`acquire` usage", () => {
 		const delay = 50;
-		const offset = 3;
+		const offset = 5;
 
 		it("should work with a single initial permit", async () => {
 			// semaphore as a mutex
@@ -184,7 +184,7 @@ describe("Semaphore", () => {
 
 	describe("`tryAcquire` usage", () => {
 		const delay = 50;
-		const offset = 3;
+		const offset = 5;
 
 		it("should work with many initial tryAcquires/releases", async () => {
 			for (const permits of [5, 8, 13]) {
@@ -249,6 +249,49 @@ describe("Semaphore", () => {
 			// The queue is reset, since the `tryAcquire` failed (would have been cleared even on success)
 			expect(semaphore.queueLength).toBe(0);
 			expect(semaphore.permitsAvailable).toBe(3); // the release in the timeout
+		});
+
+		it("should release other `acquire` or `tryAcquire` when a `tryAcquire` fails", async () => {
+			const semaphore = new Semaphore(1);
+
+			setTimeout(() => {
+				expect(semaphore.permitsAvailable).toBe(0);
+				expect(semaphore.permitsRequired).toBe(5);
+				expect(semaphore.queueLength).toBe(2);
+				semaphore.release();
+				expect(semaphore.permitsRequired).toBe(4);
+				expect(semaphore.queueLength).toBe(2);
+			}, delay);
+
+			await Promise.all([
+				// `acquire` after the `tryAcquire`
+				new Promise(resolve => setTimeout(resolve, delay / 2)).then(() =>
+					semaphore.acquire(3)
+				),
+
+				semaphore
+					.tryAcquire(delay * 2, 3)
+					.catch((error: unknown) => {
+						if (error instanceof ConcurrencyExceedTimeoutException) {
+							return;
+						}
+						throw error;
+					})
+					.finally(() => {
+						// The release in the `setTimeout` reduced the required permits
+						// of the second acquire to 1, so still 0 available
+						expect(semaphore.permitsAvailable).toBe(0);
+						expect(semaphore.permitsRequired).toBe(1);
+						expect(semaphore.queueLength).toBe(1);
+
+						setTimeout(() => semaphore.release(2), delay);
+					})
+			]);
+
+			// The state is reset: 3 permits released for a single successful acquire (+ the initial one)
+			expect(semaphore.permitsAvailable).toBe(1);
+			expect(semaphore.permitsRequired).toBe(0);
+			expect(semaphore.queueLength).toBe(0);
 		});
 	});
 
