@@ -264,8 +264,10 @@ describe("Semaphore", () => {
 			}, delay);
 
 			await Promise.all([
-				// second acquire in time
-				new Promise(resolve => setTimeout(resolve, 10)).then(() => semaphore.acquire(2)),
+				// `acquire` after the `tryAcquire`
+				new Promise(resolve => setTimeout(resolve, delay / 2)).then(() =>
+					semaphore.acquire(3)
+				),
 
 				semaphore
 					.tryAcquire(delay * 2, 3)
@@ -286,7 +288,7 @@ describe("Semaphore", () => {
 					})
 			]);
 
-			// The state is reset: 2 permits released for a single successful acquire (+ the initial one)
+			// The state is reset: 3 permits released for a single successful acquire (+ the initial one)
 			expect(semaphore.permitsAvailable).toBe(1);
 			expect(semaphore.permitsRequired).toBe(0);
 			expect(semaphore.queueLength).toBe(0);
