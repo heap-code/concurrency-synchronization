@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/heap-code/concurrency-synchronization/compare/v0.1.0...v0.1.1) (2023-06-21)
+
+
+### Bug Fixes
+
+* **semaphore:** release acquired permits "allocated" to a recently failed `tryLock` ([0be72f9](https://github.com/heap-code/concurrency-synchronization/commit/0be72f9651e9130c728a8763c9f3954069da924b))
+
 # [0.1.0](https://github.com/heap-code/concurrency-synchronization/compare/v0.0.2...v0.1.0) (2023-06-19)
 
 
