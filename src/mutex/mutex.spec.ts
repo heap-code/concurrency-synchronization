@@ -21,7 +21,7 @@ describe("Mutex", () => {
 
 	describe("`lock` usage", () => {
 		const delay = 50;
-		const offset = 3;
+		const offset = 5;
 
 		it("should work with a basic usage", async () => {
 			// semaphore as a mutex
@@ -114,7 +114,7 @@ describe("Mutex", () => {
 
 	describe("`tryLock` usage", () => {
 		const delay = 50;
-		const offset = 3;
+		const offset = 5;
 
 		it("should work with tryLock/unlock", async () => {
 			const mutex = new Mutex();

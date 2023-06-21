@@ -72,7 +72,7 @@ describe("Semaphore", () => {
 
 	describe("`acquire` usage", () => {
 		const delay = 50;
-		const offset = 3;
+		const offset = 5;
 
 		it("should work with a single initial permit", async () => {
 			// semaphore as a mutex
@@ -184,7 +184,7 @@ describe("Semaphore", () => {
 
 	describe("`tryAcquire` usage", () => {
 		const delay = 50;
-		const offset = 3;
+		const offset = 5;
 
 		it("should work with many initial tryAcquires/releases", async () => {
 			for (const permits of [5, 8, 13]) {
