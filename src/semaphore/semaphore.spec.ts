@@ -251,6 +251,23 @@ describe("Semaphore", () => {
 			expect(semaphore.permitsAvailable).toBe(3); // the release in the timeout
 		});
 
+		it('should not "reset" the state after a `tryAcquire`', async () => {
+			const semaphore = new Semaphore(1);
+
+			// "Regular" use
+			setTimeout(() => semaphore.release(), delay / 2);
+			await semaphore.tryAcquire(delay, 2);
+
+			// Ok
+			expect(semaphore.permitsAvailable).toBe(0);
+			expect(semaphore.permitsRequired).toBe(0);
+
+			// After the try timeout
+			await new Promise(resolve => setTimeout(resolve, delay));
+			expect(semaphore.permitsAvailable).toBe(0);
+			expect(semaphore.permitsRequired).toBe(0);
+		});
+
 		it("should release other `acquire` or `tryAcquire` when a `tryAcquire` fails", async () => {
 			const semaphore = new Semaphore(1);
 
