@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/heap-code/concurrency-synchronization/compare/v0.1.1...v0.1.2) (2023-06-22)
+
+
+### Bug Fixes
+
+* **semaphore:** clear timeout after acquire ([1d7f3e7](https://github.com/heap-code/concurrency-synchronization/commit/1d7f3e7e47421fc36b3e1dd4cf7206112404ab44))
+
 ## [0.1.1](https://github.com/heap-code/concurrency-synchronization/compare/v0.1.0...v0.1.1) (2023-06-21)
 
 

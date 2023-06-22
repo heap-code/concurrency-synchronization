@@ -81,5 +81,5 @@
 		"test:watch": "npm run test -- --watch"
 	},
 	"types": "./dist/types/index.js",
-	"version": "0.1.1"
+	"version": "0.1.2"
 }
