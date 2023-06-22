@@ -142,13 +142,20 @@ export class Semaphore implements Synchronizer {
 			const { reject, resolvers } = item;
 
 			setTimeout(() => {
-				// Re-establish th permits: the previous permits + the releases that were called during the wait
-				this.permits += permitsBck + (permitsRemaining - resolvers.length);
-
-				// Removes the item form the queue
+				// Remove the item from the queue
 				const index = this.queue.findIndex(i => i === item);
 				if (index >= 0) {
 					this.queue.splice(index, 1);
+				}
+
+				// Re-establish the permits: the previous permits + the releases that were called during the wait
+				const permitsTaken = permitsBck + (permitsRemaining - resolvers.length);
+				const permitsToRelease = Math.min(permitsTaken, this.permitsRequired);
+
+				this.permits += permitsTaken - permitsToRelease;
+				if (permitsToRelease > 0) {
+					// "free" the permits for this failed `tryLock`
+					this.release(permitsToRelease);
 				}
 
 				reject(

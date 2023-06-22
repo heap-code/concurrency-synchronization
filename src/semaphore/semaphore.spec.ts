@@ -72,7 +72,7 @@ describe("Semaphore", () => {
 
 	describe("`acquire` usage", () => {
 		const delay = 50;
-		const offset = 3;
+		const offset = 5;
 
 		it("should work with a single initial permit", async () => {
 			// semaphore as a mutex
@@ -184,7 +184,7 @@ describe("Semaphore", () => {
 
 	describe("`tryAcquire` usage", () => {
 		const delay = 50;
-		const offset = 3;
+		const offset = 5;
 
 		it("should work with many initial tryAcquires/releases", async () => {
 			for (const permits of [5, 8, 13]) {
@@ -281,8 +281,10 @@ describe("Semaphore", () => {
 			}, delay);
 
 			await Promise.all([
-				// second acquire in time
-				new Promise(resolve => setTimeout(resolve, 10)).then(() => semaphore.acquire(2)),
+				// `acquire` after the `tryAcquire`
+				new Promise(resolve => setTimeout(resolve, delay / 2)).then(() =>
+					semaphore.acquire(3)
+				),
 
 				semaphore
 					.tryAcquire(delay * 2, 3)
@@ -303,7 +305,7 @@ describe("Semaphore", () => {
 					})
 			]);
 
-			// The state is reset: 2 permits released for a single successful acquire (+ the initial one)
+			// The state is reset: 3 permits released for a single successful acquire (+ the initial one)
 			expect(semaphore.permitsAvailable).toBe(1);
 			expect(semaphore.permitsRequired).toBe(0);
 			expect(semaphore.queueLength).toBe(0);
