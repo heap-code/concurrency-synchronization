@@ -31,6 +31,8 @@ export class Mutex implements Synchronizer {
 	/**
 	 * Locks this mutex
 	 *
+	 * [lockWith]{@link lockWith} is the preferred choice.
+	 *
 	 * @throws {ConcurrencyInterruptedException} when the mutex is interrupted
 	 * @returns a promise when the lock has been set
 	 */
@@ -43,6 +45,8 @@ export class Mutex implements Synchronizer {
 	 *
 	 * Throws an error if the given time exceeds
 	 *
+	 * [tryLockWith]{@link tryLockWith} is the preferred choice.
+	 *
 	 * @param timeout maximum time (in ms) to lock
 	 * @throws {ConcurrencyExceedTimeoutException} when the time limit exceeds
 	 * @throws {ConcurrencyInterruptedException} when the mutex is interrupted
@@ -54,9 +58,37 @@ export class Mutex implements Synchronizer {
 
 	/**
 	 * Unlocks this mutex
+	 *
+	 * [lockWith]{@link lockWith} or [tryLockWith]{@link tryLockWith} are the preferred choices.
 	 */
 	public unlock() {
 		this.semaphore.release();
+	}
+
+	/**
+	 * Locks this mutex and run the critical section function
+	 * Then, automatically unlocks it.
+	 *
+	 * @param cs function to run once the locked is acquired (critical section)
+	 * @throws {ConcurrencyInterruptedException} when the mutex is interrupted
+	 * @returns a Promise after the mutex locked and unlocked and what has been return from `fn`
+	 */
+	public lockWith<T = void>(cs: () => Promise<T> | T): Promise<T> {
+		return Promise.reject(new Error("Not implemented"));
+	}
+
+	/**
+	 * Locks this mutex within a time limit and run the critical section function
+	 * Then, automatically unlocks it.
+	 *
+	 * @param timeout maximum time (in ms) to lock
+	 * @param cs function to run once the locked is acquired (critical section)
+	 * @throws {ConcurrencyExceedTimeoutException} when the time limit exceeds
+	 * @throws {ConcurrencyInterruptedException} when the mutex is interrupted
+	 * @returns a Promise after the mutex locked and unlocked and what has been return from `fn`
+	 */
+	public tryLockWith<T = void>(timeout: number, cs: () => Promise<T> | T): Promise<T> {
+		return Promise.reject(new Error("Not implemented"));
 	}
 
 	/**
