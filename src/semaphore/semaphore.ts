@@ -138,10 +138,12 @@ export class Semaphore implements Synchronizer {
 		const permitsBck = this.permits;
 		this.permits = 0;
 
+		// TODO: something prettier?
+		let timeoutId: NodeJS.Timeout | null = null;
 		return this.acquireLock(permitsRemaining, item => {
 			const { reject, resolvers } = item;
 
-			setTimeout(() => {
+			timeoutId = setTimeout(() => {
 				// Remove the item from the queue
 				const index = this.queue.findIndex(i => i === item);
 				if (index >= 0) {
@@ -164,6 +166,10 @@ export class Semaphore implements Synchronizer {
 					)
 				);
 			}, timeout);
+		}).finally(() => {
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
 		});
 	}
 
@@ -248,7 +254,7 @@ export class Semaphore implements Synchronizer {
 	/**
 	 * @param permits the permits to obtain
 	 * @param afterInit after the blocking promise resolver has been set but still in the promise body
-	 * @returns the added item to the queue
+	 * @returns the blocking promise
 	 */
 	private acquireLock(permits: number, afterInit?: (item: QueueItem) => void) {
 		return new Promise<void>((resolve, reject) => {
