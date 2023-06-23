@@ -71,10 +71,14 @@ export class Mutex implements Synchronizer {
 	 *
 	 * @param cs function to run once the locked is acquired (critical section)
 	 * @throws {ConcurrencyInterruptedException} when the mutex is interrupted
-	 * @returns a Promise after the mutex locked and unlocked and what has been return from `fn`
+	 * @returns a Promise after the mutex locked and unlocked and what has been return from critical section
 	 */
-	public lockWith<T = void>(cs: () => Promise<T> | T): Promise<T> {
-		return Promise.reject(new Error("Not implemented"));
+	public async lockWith<T = void>(cs: () => Promise<T> | T): Promise<T> {
+		await this.lock();
+		const value = await cs();
+
+		this.unlock();
+		return value;
 	}
 
 	/**
@@ -87,8 +91,12 @@ export class Mutex implements Synchronizer {
 	 * @throws {ConcurrencyInterruptedException} when the mutex is interrupted
 	 * @returns a Promise after the mutex locked and unlocked and what has been return from `fn`
 	 */
-	public tryLockWith<T = void>(timeout: number, cs: () => Promise<T> | T): Promise<T> {
-		return Promise.reject(new Error("Not implemented"));
+	public async tryLockWith<T = void>(timeout: number, cs: () => Promise<T> | T): Promise<T> {
+		await this.tryLock(timeout);
+		const value = await cs();
+
+		this.unlock();
+		return value;
 	}
 
 	/**
