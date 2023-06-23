@@ -118,6 +118,8 @@ describe("Mutex", () => {
 	});
 
 	describe("`tryLock` usage", () => {
+		const offset = 10;
+
 		it("should work with tryLock/unlock", async () => {
 			const mutex = new Mutex();
 
