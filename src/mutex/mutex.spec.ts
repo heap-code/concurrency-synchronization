@@ -1,4 +1,5 @@
 import { Mutex } from "./mutex";
+import { sleep } from "../../support/sleep";
 import { timeFunction } from "../../support/time-function";
 import {
 	ConcurrencyExceedTimeoutException,
@@ -7,6 +8,9 @@ import {
 } from "../exceptions";
 
 describe("Mutex", () => {
+	const delay = 50;
+	const offset = 5;
+
 	describe("Input validation", () => {
 		const mutex = new Mutex();
 
@@ -20,9 +24,6 @@ describe("Mutex", () => {
 	});
 
 	describe("`lock` usage", () => {
-		const delay = 50;
-		const offset = 5;
-
 		it("should work with a basic usage", async () => {
 			// semaphore as a mutex
 			const mutex = new Mutex();
@@ -113,9 +114,6 @@ describe("Mutex", () => {
 	});
 
 	describe("`tryLock` usage", () => {
-		const delay = 50;
-		const offset = 5;
-
 		it("should work with tryLock/unlock", async () => {
 			const mutex = new Mutex();
 
@@ -152,6 +150,106 @@ describe("Mutex", () => {
 		});
 	});
 
+	describe("`lockWith` usage", () => {
+		it("should work like a regular `lock`/`unlock`", async () => {
+			const mutex = new Mutex();
+
+			const [elapsed] = await timeFunction(async () => {
+				expect(mutex.isLocked).toBeFalse();
+				expect(mutex.queueLength).toBe(0);
+
+				void sleep(delay / 2).then(() => {
+					// In the first mutex (that locked)
+					expect(mutex.isLocked).toBeTrue();
+					expect(mutex.queueLength).toBe(1);
+				});
+
+				void sleep((delay / 2) * 3).then(() => {
+					// In the second mutex (that locked)
+					expect(mutex.isLocked).toBeTrue();
+					expect(mutex.queueLength).toBe(0);
+				});
+
+				await Promise.all([
+					mutex.lockWith(() => sleep(delay)),
+					mutex.lockWith(() => sleep(delay))
+				]);
+
+				expect(mutex.isLocked).toBeFalse();
+				expect(mutex.queueLength).toBe(0);
+			});
+
+			expect(elapsed).toBeGreaterThanOrEqual(delay * 2 - offset);
+			expect(elapsed).toBeLessThanOrEqual(delay * 2 + offset);
+		});
+
+		it("should return the value from the critical section", async () => {
+			const mutex = new Mutex();
+
+			const [v1, v2, v3] = await Promise.all([
+				sleep(Math.random() * delay).then(() => mutex.lockWith(() => 1)),
+				sleep(Math.random() * delay).then(() => mutex.lockWith(() => 2)),
+				sleep(Math.random() * delay).then(() => mutex.lockWith(() => 3))
+			]);
+
+			expect(v1).toBe(1);
+			expect(v2).toBe(2);
+			expect(v3).toBe(3);
+		});
+	});
+
+	describe("`tryLockWith` usage", () => {
+		it("should work like a regular `tryLock`/`unlock`", async () => {
+			const mutex = new Mutex();
+
+			const [elapsed] = await timeFunction(() =>
+				Promise.all([
+					mutex.tryLockWith(delay, () => sleep(delay / 2)),
+					mutex.tryLockWith(delay, () => sleep(delay / 2))
+				])
+			);
+
+			// each `tryLockWith` keep the lock for delay / 2 time
+			expect(elapsed).toBeGreaterThanOrEqual(delay - offset);
+			expect(elapsed).toBeLessThanOrEqual(delay + offset);
+		});
+
+		it("should thrown an error when the time exceeds", async () => {
+			const mutex = new Mutex();
+
+			await mutex.lock();
+			expect(mutex.isLocked).toBeTrue();
+			expect(mutex.queueLength).toBe(0);
+
+			setTimeout(() => {
+				expect(mutex.isLocked).toBeTrue();
+				expect(mutex.queueLength).toBe(1);
+			}, delay / 2);
+
+			await expect(() => mutex.tryLockWith(delay, () => 1)).rejects.toThrow(
+				ConcurrencyExceedTimeoutException
+			);
+			expect(mutex.isLocked).toBeTrue();
+			expect(mutex.queueLength).toBe(0);
+
+			mutex.unlock();
+		});
+
+		it("should return the value from the critical section", async () => {
+			const mutex = new Mutex();
+
+			const [v1, v2, v3] = await Promise.all([
+				sleep(Math.random() * delay).then(() => mutex.tryLockWith(5, () => 1)),
+				sleep(Math.random() * delay).then(() => mutex.tryLockWith(5, () => 2)),
+				sleep(Math.random() * delay).then(() => mutex.tryLockWith(5, () => 3))
+			]);
+
+			expect(v1).toBe(1);
+			expect(v2).toBe(2);
+			expect(v3).toBe(3);
+		});
+	});
+
 	it("should interrupt all", async () => {
 		const delay = 100;
 		const mutex = new Mutex();
@@ -162,14 +260,15 @@ describe("Mutex", () => {
 
 		setTimeout(() => {
 			expect(mutex.isLocked).toBeTrue();
-			expect(mutex.queueLength).toBe(3);
+			expect(mutex.queueLength).toBe(4);
 			mutex.interrupt(reason);
 		}, delay);
 
 		const errors = await Promise.all([
 			mutex.lock().catch((err: unknown) => err),
 			mutex.tryLock(delay * 2).catch((err: unknown) => err),
-			mutex.lock().catch((err: unknown) => err)
+			mutex.lockWith(() => 0).catch((err: unknown) => err),
+			mutex.tryLockWith(delay * 2, () => 0).catch((err: unknown) => err)
 		]);
 
 		for (const error of errors) {
