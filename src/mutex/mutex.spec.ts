@@ -39,13 +39,16 @@ describe("Mutex", () => {
 					expect(mutex.isLocked).toBeTrue();
 					expect(mutex.queueLength).toBe(1);
 					mutex.unlock();
-					expect(mutex.isLocked).toBeFalse();
+					expect(mutex.isLocked).toBeTrue();
 					expect(mutex.queueLength).toBe(0);
 				}, delay);
 
 				// Will wait until the end of the `setTimeout`
 				await mutex.lock();
 			});
+
+			mutex.unlock();
+			expect(mutex.isLocked).toBeFalse();
 
 			expect(elapsed).toBeGreaterThanOrEqual(delay - offset);
 			expect(elapsed).toBeLessThanOrEqual(delay + offset);
@@ -81,7 +84,7 @@ describe("Mutex", () => {
 				expect(mutex.isLocked).toBeTrue();
 				expect(mutex.queueLength).toBe(1);
 				mutex.unlock();
-				expect(mutex.isLocked).toBeFalse();
+				expect(mutex.isLocked).toBeTrue();
 				expect(mutex.queueLength).toBe(0);
 			}, max);
 
@@ -108,6 +111,7 @@ describe("Mutex", () => {
 			expect(elapsed).toBeGreaterThanOrEqual(max - offset);
 			expect(elapsed).toBeLessThanOrEqual(max + offset);
 
+			mutex.unlock();
 			expect(mutex.isLocked).toBeFalse();
 			expect(mutex.queueLength).toBe(0);
 		});
@@ -143,6 +147,8 @@ describe("Mutex", () => {
 			await expect(() => mutex.tryLock(delay)).rejects.toThrow(
 				ConcurrencyExceedTimeoutException
 			);
+
+			mutex.unlock();
 
 			// The queue is reset, since the `tryAcquire` failed
 			expect(mutex.queueLength).toBe(0);

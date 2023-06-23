@@ -18,7 +18,7 @@ export class Mutex implements Synchronizer {
 	 * @returns if the current mutex is currently locked
 	 */
 	public get isLocked(): boolean {
-		return this.queueLength !== 0;
+		return this.semaphore.permitsAvailable === 0;
 	}
 
 	/**
