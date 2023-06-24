@@ -76,7 +76,7 @@
 		"compodoc:coverage": "npm run compodoc:build -- --coverageTest 80",
 		"lint": "eslint .",
 		"lint:fix": "npm run lint -- --fix",
-		"test": "jest --config jest.config.ts",
+		"test": "jest --config jest.config.ts --runInBand",
 		"test:coverage": "npm run test -- --coverage",
 		"test:watch": "npm run test -- --watch"
 	},

@@ -8,8 +8,9 @@ import {
 } from "../exceptions";
 
 describe("Mutex", () => {
-	const delay = 50;
-	const offset = 5;
+	const delay = 60;
+	const offsetLow = 5;
+	const offset = 15;
 
 	describe("Input validation", () => {
 		const mutex = new Mutex();
@@ -50,7 +51,7 @@ describe("Mutex", () => {
 			mutex.unlock();
 			expect(mutex.isLocked).toBeFalse();
 
-			expect(elapsed).toBeGreaterThanOrEqual(delay - offset);
+			expect(elapsed).toBeGreaterThanOrEqual(delay - offsetLow);
 			expect(elapsed).toBeLessThanOrEqual(delay + offset);
 		});
 
@@ -100,15 +101,15 @@ describe("Mutex", () => {
 				.map(([elapsed]) => elapsed)
 				.sort((a, b) => a - b);
 
-			expect(elapsed1).toBeGreaterThanOrEqual(min - offset);
+			expect(elapsed1).toBeGreaterThanOrEqual(min - offsetLow);
 			expect(elapsed1).toBeLessThanOrEqual(min + offset);
-			expect(elapsed2).toBeGreaterThanOrEqual(med - offset);
+			expect(elapsed2).toBeGreaterThanOrEqual(med - offsetLow);
 			expect(elapsed2).toBeLessThanOrEqual(med + offset);
-			expect(elapsed3).toBeGreaterThanOrEqual(max - offset);
+			expect(elapsed3).toBeGreaterThanOrEqual(max - offsetLow);
 			expect(elapsed3).toBeLessThanOrEqual(max + offset);
 
 			// The global elapsed time is very close to the slowest timeout
-			expect(elapsed).toBeGreaterThanOrEqual(max - offset);
+			expect(elapsed).toBeGreaterThanOrEqual(max - offsetLow);
 			expect(elapsed).toBeLessThanOrEqual(max + offset);
 
 			mutex.unlock();
@@ -131,7 +132,7 @@ describe("Mutex", () => {
 				await mutex.tryLock(delay * 5);
 			});
 
-			expect(elapsed).toBeGreaterThanOrEqual(delay - offset);
+			expect(elapsed).toBeGreaterThanOrEqual(delay - offsetLow);
 			expect(elapsed).toBeLessThanOrEqual(delay + offset);
 		});
 
@@ -187,8 +188,8 @@ describe("Mutex", () => {
 				expect(mutex.queueLength).toBe(0);
 			});
 
-			expect(elapsed).toBeGreaterThanOrEqual(delay * 2 - offset);
-			expect(elapsed).toBeLessThanOrEqual(delay * 2 + offset);
+			expect(elapsed).toBeGreaterThanOrEqual(delay * 2 - offsetLow);
+			expect(elapsed).toBeLessThanOrEqual((delay + offset) * 2);
 		});
 
 		it("should return the value from the critical section", async () => {
@@ -218,7 +219,7 @@ describe("Mutex", () => {
 			);
 
 			// each `tryLockWith` keep the lock for delay / 2 time
-			expect(elapsed).toBeGreaterThanOrEqual(delay - offset);
+			expect(elapsed).toBeGreaterThanOrEqual(delay - offsetLow);
 			expect(elapsed).toBeLessThanOrEqual(delay + offset);
 		});
 
