@@ -226,7 +226,7 @@ export class Semaphore implements Synchronizer {
 	}
 
 	/**
-	 * Interrupts all awaiting "Threads" with an [exception]{@link ConcurrencyInterruptedException}.
+	 * Interrupts all awaiting "threads" with an [exception]{@link ConcurrencyInterruptedException}.
 	 *
 	 * @param reason The reason why this semaphore is being interrupted
 	 * @param permits The permits to set to this semaphore once everything has been interrupted
