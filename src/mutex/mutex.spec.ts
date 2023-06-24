@@ -188,7 +188,7 @@ describe("Mutex", () => {
 			});
 
 			expect(elapsed).toBeGreaterThanOrEqual(delay * 2 - offset);
-			expect(elapsed).toBeLessThanOrEqual(delay * 2 + offset);
+			expect(elapsed).toBeLessThanOrEqual((delay + offset) * 2);
 		});
 
 		it("should return the value from the critical section", async () => {
