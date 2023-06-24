@@ -1,5 +1,18 @@
 # Changelog
 
+# [0.2.0](https://github.com/heap-code/concurrency-synchronization/compare/v0.1.2...v0.2.0) (2023-06-24)
+
+
+### Bug Fixes
+
+* **mutex:** correct `isLocked` value ([af6c84b](https://github.com/heap-code/concurrency-synchronization/commit/af6c84b10f01daa25395c75dbd4a26040fb30487))
+
+
+### Features
+
+* **mutex:** add lockWith and tryLockWith bodies ([01135a6](https://github.com/heap-code/concurrency-synchronization/commit/01135a65779eb3eb2b0dfa96706d368a65ebd8f5)), closes [#2](https://github.com/heap-code/concurrency-synchronization/issues/2)
+* **mutex:** add lockWith and tryLockWith definitions ([2bc30d7](https://github.com/heap-code/concurrency-synchronization/commit/2bc30d7d7bc64f62ad68e95f81f2fc77c894e98e)), closes [#2](https://github.com/heap-code/concurrency-synchronization/issues/2)
+
 ## [0.1.2](https://github.com/heap-code/concurrency-synchronization/compare/v0.1.1...v0.1.2) (2023-06-22)
 
 
