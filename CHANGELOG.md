@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/heap-code/concurrency-synchronization/compare/v0.2.0...v0.2.2) (2023-06-24)
+
+
+### Bug Fixes
+
+* **ci:** set runInBand when testing ([a26d8db](https://github.com/heap-code/concurrency-synchronization/commit/a26d8db8800fa12c2b616392d88a33fb8e87d677))
+
 # [0.2.0](https://github.com/heap-code/concurrency-synchronization/compare/v0.1.2...v0.2.0) (2023-06-24)
 
 
