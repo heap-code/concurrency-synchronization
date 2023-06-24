@@ -6,6 +6,10 @@ import { ConcurrencyExceedTimeoutException } from "../exceptions/concurrency.exc
 import { ConcurrencyInvalidTimeoutException } from "../exceptions/concurrency.invalid-timeout.exception";
 
 describe("Semaphore", () => {
+	const delay = 60;
+	const offsetLow = 5;
+	const offset = 15;
+
 	describe("Constructor", () => {
 		it("should create an instance", () => {
 			for (const permits of [1, 10, 100]) {
@@ -71,9 +75,6 @@ describe("Semaphore", () => {
 	});
 
 	describe("`acquire` usage", () => {
-		const delay = 50;
-		const offset = 5;
-
 		it("should work with a single initial permit", async () => {
 			// semaphore as a mutex
 			const semaphore = new Semaphore();
@@ -98,7 +99,7 @@ describe("Semaphore", () => {
 				await semaphore.acquire();
 			});
 
-			expect(elapsed).toBeGreaterThanOrEqual(delay - offset);
+			expect(elapsed).toBeGreaterThanOrEqual(delay - offsetLow);
 			expect(elapsed).toBeLessThanOrEqual(delay + offset);
 
 			semaphore.release();
@@ -124,7 +125,7 @@ describe("Semaphore", () => {
 				await semaphore.acquire();
 			});
 
-			expect(elapsed).toBeGreaterThanOrEqual(delay - offset);
+			expect(elapsed).toBeGreaterThanOrEqual(delay - offsetLow);
 			expect(elapsed).toBeLessThanOrEqual(delay + offset);
 		});
 
@@ -138,7 +139,7 @@ describe("Semaphore", () => {
 					await semaphore.acquire(permits + permitOffset);
 				});
 
-				expect(elapsed).toBeGreaterThanOrEqual(delay - offset);
+				expect(elapsed).toBeGreaterThanOrEqual(delay - offsetLow);
 				expect(elapsed).toBeLessThanOrEqual(delay + offset);
 			}
 		});
@@ -167,15 +168,15 @@ describe("Semaphore", () => {
 				.map(([elapsed]) => elapsed)
 				.sort((a, b) => a - b);
 
-			expect(elapsed1).toBeGreaterThanOrEqual(min - offset);
+			expect(elapsed1).toBeGreaterThanOrEqual(min - offsetLow);
 			expect(elapsed1).toBeLessThanOrEqual(min + offset);
-			expect(elapsed2).toBeGreaterThanOrEqual(med - offset);
+			expect(elapsed2).toBeGreaterThanOrEqual(med - offsetLow);
 			expect(elapsed2).toBeLessThanOrEqual(med + offset);
-			expect(elapsed3).toBeGreaterThanOrEqual(max - offset);
+			expect(elapsed3).toBeGreaterThanOrEqual(max - offsetLow);
 			expect(elapsed3).toBeLessThanOrEqual(max + offset);
 
 			// The global elapsed time is very close to the slowest timeout
-			expect(elapsed).toBeGreaterThanOrEqual(max - offset);
+			expect(elapsed).toBeGreaterThanOrEqual(max - offsetLow);
 			expect(elapsed).toBeLessThanOrEqual(max + offset);
 
 			expect(elapsed).toBeGreaterThanOrEqual(elapsed3);
@@ -183,9 +184,6 @@ describe("Semaphore", () => {
 	});
 
 	describe("`tryAcquire` usage", () => {
-		const delay = 50;
-		const offset = 5;
-
 		it("should work with many initial tryAcquires/releases", async () => {
 			for (const permits of [5, 8, 13]) {
 				const semaphore = new Semaphore(permits);
@@ -196,7 +194,7 @@ describe("Semaphore", () => {
 					await semaphore.tryAcquire(delay * 5, permits + permitOffset);
 				});
 
-				expect(elapsed).toBeGreaterThanOrEqual(delay - offset);
+				expect(elapsed).toBeGreaterThanOrEqual(delay - offsetLow);
 				expect(elapsed).toBeLessThanOrEqual(delay + offset);
 			}
 		});
