@@ -7,7 +7,21 @@ export class ProducerConsumer<T> implements Synchronizer {
 	private readonly items: T[];
 
 	/**
-	 * @returns the number of waiting "Threads" on any read
+	 * @returns the current number of available items
+	 */
+	public get itemsAvailable() {
+		return this.items.length;
+	}
+
+	/**
+	 * @returns the minimal number of items needed to release all "threads"
+	 */
+	public get itemsRequired(): number {
+		throw new Error("Not implemented yet");
+	}
+
+	/**
+	 * @returns the number of waiting "threads" on any read
 	 */
 	public get queueLength(): number {
 		throw new Error("Not implemented yet");
@@ -84,11 +98,7 @@ export class ProducerConsumer<T> implements Synchronizer {
 	 *
 	 * @param items the items to write
 	 */
-	public write(items: T | T[]) {
-		if (!Array.isArray(items)) {
-			items = [items];
-		}
-
+	public write(...items: T[]) {
 		throw new Error("Not implemented yet");
 	}
 
