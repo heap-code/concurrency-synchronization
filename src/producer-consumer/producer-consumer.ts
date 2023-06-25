@@ -1,30 +1,43 @@
+import { ProducerConsumerInvalidReadParameterException } from "./exceptions";
+import { Semaphore } from "../semaphore";
 import { Synchronizer } from "../synchronizer.interface";
 
+/**
+ * A ProducerConsumer class to read and write data with synchronization.
+ *
+ * The queue is a simple FIFO (First In, First Out).
+ */
 export class ProducerConsumer<T> implements Synchronizer {
 	/**
-	 * The data available for instant reading
+	 * The that will be read and write
 	 */
 	private readonly items: T[];
+	/**
+	 * The internal semaphore for synchronization
+	 */
+	private readonly semaphore: Semaphore;
+
+	// With a mutex around `items`, it'll look like a Monitor pattern
 
 	/**
 	 * @returns the current number of available items
 	 */
 	public get itemsAvailable() {
-		return this.items.length;
+		return this.semaphore.permitsAvailable;
 	}
 
 	/**
 	 * @returns the minimal number of items needed to release all "threads"
 	 */
 	public get itemsRequired(): number {
-		throw new Error("Not implemented yet");
+		return this.semaphore.permitsRequired;
 	}
 
 	/**
 	 * @returns the number of waiting "threads" on any read
 	 */
 	public get queueLength(): number {
-		throw new Error("Not implemented yet");
+		return this.semaphore.queueLength;
 	}
 
 	/**
@@ -34,6 +47,7 @@ export class ProducerConsumer<T> implements Synchronizer {
 	 */
 	public constructor(initialItems: readonly T[] = []) {
 		this.items = initialItems.slice();
+		this.semaphore = new Semaphore(initialItems.length);
 	}
 
 	/**
@@ -45,8 +59,15 @@ export class ProducerConsumer<T> implements Synchronizer {
 	 * @throws {ConcurrencyInterruptedException} when the producer-consumer is interrupted
 	 * @returns a promise with the read results
 	 */
-	public read(nItem: number): Promise<T[]> {
-		throw new Error("Not implemented yet");
+	public async read(nItem: number): Promise<T[]> {
+		if (nItem < 0) {
+			throw new ProducerConsumerInvalidReadParameterException(
+				"Can not read a negative number of items."
+			);
+		}
+
+		await this.semaphore.acquire(nItem);
+		return this.items.splice(0, nItem);
 	}
 
 	/**
@@ -57,7 +78,7 @@ export class ProducerConsumer<T> implements Synchronizer {
 	 * @returns a promise with the read results
 	 */
 	public readOne(): Promise<T> {
-		return this.read(1).then(([data]) => data);
+		return this.read(1).then(([item]) => item);
 	}
 
 	/**
@@ -73,8 +94,15 @@ export class ProducerConsumer<T> implements Synchronizer {
 	 * @throws {ConcurrencyInterruptedException} when the producer-consumer is interrupted
 	 * @returns a promise with the read results
 	 */
-	public tryRead(timeout: number, nItem: number): Promise<T[]> {
-		throw new Error("Not implemented yet");
+	public async tryRead(timeout: number, nItem: number): Promise<T[]> {
+		if (nItem < 0) {
+			throw new ProducerConsumerInvalidReadParameterException(
+				"Can not read a negative number of items."
+			);
+		}
+
+		await this.semaphore.tryAcquire(timeout, nItem);
+		return this.items.splice(0, nItem);
 	}
 
 	/**
@@ -89,17 +117,18 @@ export class ProducerConsumer<T> implements Synchronizer {
 	 * @returns a promise with the read result
 	 */
 	public tryReadOne(timeout: number): Promise<T> {
-		return this.tryRead(timeout, 1).then(([data]) => data);
+		return this.tryRead(timeout, 1).then(([item]) => item);
 	}
 
 	/**
 	 * Write some items to the producer-consumer buffer.
-	 * It releases the await readings or store the data.
+	 * It releases the await readings or store the data for future readings.
 	 *
 	 * @param items the items to write
 	 */
 	public write(...items: T[]) {
-		throw new Error("Not implemented yet");
+		this.items.push(...items);
+		this.semaphore.release(items.length);
 	}
 
 	/**
@@ -109,6 +138,11 @@ export class ProducerConsumer<T> implements Synchronizer {
 	 * @param items the items to set once everything has been interrupted
 	 */
 	public interrupt(reason: unknown, items: readonly T[] = []) {
-		throw new Error("Not implemented yet");
+		// Remove all content
+		this.items.splice(0, this.items.length);
+		// Set the items
+		this.items.push(...items);
+
+		this.semaphore.interrupt(reason, items.length);
 	}
 }
