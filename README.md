@@ -278,6 +278,111 @@ bootstrap()
 > **Note:**
 > Unless it is really desired, prefer [interrupt](#semaphore-interrupt) over `releaseAll`.
 
+### Producer-Consumer
+
+The `ProducerConsumer` looks a lot like a [Semaphore](#semaphore),
+but it returns values on _acquire_.
+
+By default, all readings use an array:
+
+```typescript
+async function bootstrap() {
+  const producerConsumer = new ProducerConsumer([1]);
+
+  const time1 = 100;
+  const time2 = 150;
+
+  sleep(time1).then(() => semaphore.write(3, 4));
+  sleep(time2).then(() => semaphore.write(2));
+
+  const maxTime = Math.max(time1, time2);
+
+  const before = performance.now();
+  const valuesRead = await semaphore.read(4); // waiting until all is read
+  const after = performance.now();
+
+  const elapsed = after - before; // ~150
+  console.log("Done. took %dms with expected %dms", elapsed, maxTime);
+  console.log(valuesRead) // [1, 3, 4, 2]
+}
+bootstrap();
+```
+
+#### Producer-Consumer tryRead
+
+It is possible to try to read some values in a given time limit.  
+The function will then throw an exception if it could not read in time:
+
+```typescript
+async function bootstrap() {
+  const producerConsumer = new ProducerConsumer([1, 2, 3]);
+
+  const success1 = await producerConsumer.tryRead(100, 2).then(() => true);
+  const success2 = await producerConsumer.tryRead(100, 2).catch((error: unknown) => {
+    if (error instanceof ConcurrencyExceedTimeoutException) {
+      return false;
+    }
+  
+    throw error;
+  });
+
+  console.log(success1); // true
+  console.log(success2); // false
+}
+bootstrap();
+```
+
+#### Producer-Consumer readOne
+
+The `read` and `tryRead` have their "one"-method
+that do the same thing but return only one value instead of an array:
+
+```typescript
+async function bootstrap() {
+  const producerConsumer = new ProducerConsumer([1, 2]);
+
+  // const [value1] = producerConsumer.read(1);
+  // can be written:
+  const value1 = producerConsumer.readOne();
+
+  // const [value2] = producerConsumer.tryRead(100, 1);
+ // can be written:
+  const value2 = producerConsumer.tryReadOne(100);
+  
+  console.log(value1, value2); // 1 2
+}
+bootstrap();
+```
+
+#### Producer-Consumer interrupt
+
+A `ProducerConsumer` can be interrupted at any time.  
+All awaiting _"threads"_ will then receive an exception:
+
+```typescript
+async function bootstrap() {
+  const producerConsumer = new ProducerConsumer([1]);
+
+  void sleep(100).then(() => producerConsumer.interrupt({ code: 502 }, [1, 2, 3]));
+
+  const succeed = await Promise.all([
+    producerConsumer.read(3),
+    producerConsumer.readOne(2),
+    producerConsumer.tryRead(200, 3),
+    producerConsumer.tryReadOne(200)
+  ]).catch((error: unknown) => {
+    if (error instanceof ConcurrencyInterruptedException) {
+      return false;
+    }
+    throw error;
+  });
+
+  console.log(succeed); // false
+  console.log(producerConsumer.permitsAvailable); // 3
+}
+bootstrap();
+```
+
 ## When to use
 
 This package can be useful when writing test and wanting to synchronize events.
