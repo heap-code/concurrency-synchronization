@@ -1,5 +1,6 @@
 import { SemaphoreInvalidPermitsException } from "./exceptions";
 import { Semaphore } from "./semaphore";
+import { sleep } from "../../support/sleep";
 import { timeFunction } from "../../support/time-function";
 import { ConcurrencyInterruptedException } from "../exceptions";
 import { ConcurrencyExceedTimeoutException } from "../exceptions/concurrency.exceed-timeout.exception";
@@ -207,11 +208,11 @@ describe("Semaphore", () => {
 				semaphore.tryAcquire(1, semaphore.permitsAvailable)
 			);
 
-			expect(elapsed1).toBeLessThanOrEqual(2 * offset);
-			expect(elapsed2).toBeLessThanOrEqual(2 * offset);
+			expect(elapsed1).toBeLessThanOrEqual(offset);
+			expect(elapsed2).toBeLessThanOrEqual(offset);
 		});
 
-		it("should thrown an error when the time exceeds", async () => {
+		it("should throw an error when the time exceeds", async () => {
 			const semaphore = new Semaphore(0);
 
 			// The queue has 1 element
@@ -226,7 +227,7 @@ describe("Semaphore", () => {
 			expect(semaphore.permitsAvailable).toBe(0);
 		});
 
-		it("should thrown an error and reset state when the time exceeds (many releases)", async () => {
+		it("should throw an error and reset state when the time exceeds (many releases)", async () => {
 			const semaphore = new Semaphore(2);
 
 			setTimeout(() => {
@@ -249,7 +250,7 @@ describe("Semaphore", () => {
 			expect(semaphore.permitsAvailable).toBe(3); // the release in the timeout
 		});
 
-		it('should not "reset" the state after a `tryAcquire`', async () => {
+		it('should not "reset" the state after a successful `tryAcquire`', async () => {
 			const semaphore = new Semaphore(1);
 
 			// "Regular" use
@@ -261,7 +262,7 @@ describe("Semaphore", () => {
 			expect(semaphore.permitsRequired).toBe(0);
 
 			// After the try timeout
-			await new Promise(resolve => setTimeout(resolve, delay));
+			await sleep(delay);
 			expect(semaphore.permitsAvailable).toBe(0);
 			expect(semaphore.permitsRequired).toBe(0);
 		});
@@ -273,6 +274,7 @@ describe("Semaphore", () => {
 				expect(semaphore.permitsAvailable).toBe(0);
 				expect(semaphore.permitsRequired).toBe(5);
 				expect(semaphore.queueLength).toBe(2);
+
 				semaphore.release();
 				expect(semaphore.permitsRequired).toBe(4);
 				expect(semaphore.queueLength).toBe(2);
@@ -280,9 +282,7 @@ describe("Semaphore", () => {
 
 			await Promise.all([
 				// `acquire` after the `tryAcquire`
-				new Promise(resolve => setTimeout(resolve, delay / 2)).then(() =>
-					semaphore.acquire(3)
-				),
+				sleep(delay / 2).then(() => semaphore.acquire(3)),
 
 				semaphore
 					.tryAcquire(delay * 2, 3)

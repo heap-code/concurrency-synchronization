@@ -51,7 +51,10 @@
 		"sync",
 		"synchronization",
 		"promise",
-		"thread"
+		"thread",
+		"mutex",
+		"semaphore",
+		"producer-consumer"
 	],
 	"license": "MIT",
 	"main": "./dist/cjs/index.js",
