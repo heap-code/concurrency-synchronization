@@ -30,6 +30,32 @@ Simply run:
 npm i @heap-code/concurrency-synchronization
 ```
 
+### CDN
+
+Thanks to [_jsdelivr_](https://www.jsdelivr.com/),
+this package can easily be used in browsers like this:
+
+```html
+<script
+ src="https://cdn.jsdelivr.net/npm/@heap-code/concurrency-synchronization/dist/bundles/concurrency-synchronization.umd.js"
+ type="application/javascript"
+></script>
+```
+
+> **Note:**  
+> It is recommended to use a minified and versioned bundle.
+>
+> For example:
+>
+> ```html
+> <script
+>  src="https://cdn.jsdelivr.net/npm/@heap-code/concurrency-synchronization@0.0.0/dist/bundles/concurrency-synchronization.umd.min.js"
+>  type="application/javascript"
+> ></script>
+> ```
+
+More at this [_jsdelivr_ package page](https://www.jsdelivr.com/package/npm/@heap-code/concurrency-synchronization).
+
 ## Usages
 
 In the code examples, the `sleep` function is the following:
