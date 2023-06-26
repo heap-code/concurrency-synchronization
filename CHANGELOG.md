@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.3.0](https://github.com/heap-code/concurrency-synchronization/compare/v0.2.2...v0.3.0) (2023-06-26)
+
+
+### Features
+
+* **producer-consumer:** implement ProducerConsumer ([d2983a0](https://github.com/heap-code/concurrency-synchronization/commit/d2983a0a4f8fd58f3685c79ced1198bdd6f10a42)), closes [#3](https://github.com/heap-code/concurrency-synchronization/issues/3)
+
 ## [0.2.2](https://github.com/heap-code/concurrency-synchronization/compare/v0.2.0...v0.2.2) (2023-06-24)
 
 
