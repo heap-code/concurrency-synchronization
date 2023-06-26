@@ -394,19 +394,18 @@ if it comes from _regular_ observable or [subjects](https://rxjs.dev/guide/subje
 
 So this difference can be omitted with the following:
 
-<!-- TODO: producer-consumer example -->
-
 ```typescript
 describe("My test", () => {
   it("should work", async () => {
-    const semaphore = new Semaphore(0);
-    const subscription = myObservable.subscribe(() => semaphore.release());
+    const producerConsumer = new ProducerConsumer();
+    const subscription = myObservable.subscribe(value => producerConsumer.write(value));
     // something that updates the observable
  
     // Need to pass 2 times in the event
-    await semaphore.tryAcquire(500, 2);
+    const [r1, r2] = await producerConsumer.tryRead(500, 2);
  
-    expect(1).toBe(1);
+    expect(r1).toBe(1);
+    expect(r2).toBe(2);
     subscription.unsubscribe()
   });
 });
