@@ -56,7 +56,10 @@
 		"sync",
 		"synchronization",
 		"promise",
-		"thread"
+		"thread",
+		"mutex",
+		"semaphore",
+		"producer-consumer"
 	],
 	"license": "MIT",
 	"main": "./dist/cjs/index.js",
@@ -87,5 +90,5 @@
 		"test:watch": "npm run test -- --watch"
 	},
 	"types": "./dist/types/index.js",
-	"version": "0.2.2"
+	"version": "0.3.0"
 }
