@@ -1,5 +1,17 @@
 # Changelog
 
+# [1.0.0](https://github.com/heap-code/concurrency-synchronization/compare/v0.4.0...v1.0.0) (2023-06-27)
+
+
+### Documentation
+
+* add `import` in examples ([c7752f5](https://github.com/heap-code/concurrency-synchronization/commit/c7752f59fa17a867a15f3e19775ee6034ece3037))
+
+
+### BREAKING CHANGES
+
+* First version of this package
+
 # [0.4.0](https://github.com/heap-code/concurrency-synchronization/compare/v0.3.0...v0.4.0) (2023-06-27)
 
 
