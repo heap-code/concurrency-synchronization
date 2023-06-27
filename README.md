@@ -69,7 +69,7 @@ function sleep(time: number) {
 **This is a placeholder for any asynchronous task.**
 
 > **Note:**  
-> Avoid using this package on _"production"_ code.  
+> _Avoid_ using this package on _"production"_ code.  
 > Go [here](#when-to-use) to understand why.
 
 ### Mutex
@@ -112,6 +112,8 @@ However `myVar.i` is not protected, then the final value is `1`.
 If a mutex locks the task, then the variable is protected:
 
 ```typescript
+import { Mutex } from "@heap-code/concurrency-synchronization";
+
 const mutex = new Mutex();
 const myVar = { i: 0 };
 
@@ -150,6 +152,8 @@ It is possible to try to lock a mutex in a given time limit.
 The function will then throw an exception if the mutex could not lock in time:
 
 ```typescript
+import { ConcurrencyExceedTimeoutException } from "@heap-code/concurrency-synchronization";
+
 mutex.tryLock(250).catch((error: unknown) => {
   if (error instanceof ConcurrencyExceedTimeoutException) {
     console.log("Could not lock in the given time.");
@@ -165,6 +169,8 @@ A mutex can be interrupted at any time.
 All awaiting _"threads"_ will then receive an exception:
 
 ```typescript
+import { ConcurrencyInterruptedException, Mutex } from "@heap-code/concurrency-synchronization";
+
 const mutex = new Mutex();
 const myVar = { i: 0 };
 
@@ -195,14 +201,16 @@ bootstrap();
 
 ### Semaphore
 
-From [wikipedia](https://en.wikipedia.org/wiki/Semaphore_(programming)):
-
+> From [wikipedia](https://en.wikipedia.org/wiki/Semaphore_(programming)):
+>
 > Semaphores are a type of synchronization primitive.
 
 They can be used to protect certain resources (like mutexes),
 but are generally used for synchronization:
 
 ```typescript
+import { Semaphore } from "@heap-code/concurrency-synchronization";
+
 async function bootstrap() {
   const semaphore = new Semaphore(0);
 
@@ -230,6 +238,11 @@ It is possible to try to acquire a semaphore in a given time limit.
 The function will then throw an exception if the semaphore could not acquire in time:
 
  ```typescript
+import {
+  ConcurrencyExceedTimeoutException,
+  Semaphore
+} from "@heap-code/concurrency-synchronization";
+
 async function bootstrap() {
   const semaphore = new Semaphore(2);
 
@@ -254,6 +267,8 @@ A semaphore can be interrupted at any time.
 All awaiting _"threads"_ will then receive an exception:
 
  ```typescript
+import { ConcurrencyInterruptedException, Semaphore } from "@heap-code/concurrency-synchronization";
+
 async function bootstrap() {
   const semaphore = new Semaphore(1);
 
@@ -283,6 +298,8 @@ Very similar to [interrupt](#semaphore-interrupt),
 but it does not throw an exception.
 
  ```typescript
+import { Semaphore } from "@heap-code/concurrency-synchronization";
+
 async function bootstrap() {
   const semaphore = new Semaphore(1);
 
@@ -312,19 +329,21 @@ but it returns values on _acquire_.
 By default, all readings use an array:
 
 ```typescript
+import { ProducerConsumer } from "@heap-code/concurrency-synchronization";
+
 async function bootstrap() {
   const producerConsumer = new ProducerConsumer([1]);
 
   const time1 = 100;
   const time2 = 150;
 
-  sleep(time1).then(() => semaphore.write(3, 4));
-  sleep(time2).then(() => semaphore.write(2));
+  sleep(time1).then(() => producerConsumer.write(3, 4));
+  sleep(time2).then(() => producerConsumer.write(2));
 
   const maxTime = Math.max(time1, time2);
 
   const before = performance.now();
-  const valuesRead = await semaphore.read(4); // waiting until all is read
+  const valuesRead = await producerConsumer.read(4); // waiting until all is read
   const after = performance.now();
 
   const elapsed = after - before; // ~150
@@ -340,6 +359,11 @@ It is possible to try to read some values in a given time limit.
 The function will then throw an exception if it could not read in time:
 
 ```typescript
+import {
+  ConcurrencyExceedTimeoutException,
+  ProducerConsumer
+} from "@heap-code/concurrency-synchronization";
+
 async function bootstrap() {
   const producerConsumer = new ProducerConsumer([1, 2, 3]);
 
@@ -364,16 +388,18 @@ The `read` and `tryRead` have their "one"-method
 that do the same thing but return only one value instead of an array:
 
 ```typescript
+import { ProducerConsumer } from "@heap-code/concurrency-synchronization";
+
 async function bootstrap() {
   const producerConsumer = new ProducerConsumer([1, 2]);
 
   // const [value1] = producerConsumer.read(1);
   // can be written:
-  const value1 = producerConsumer.readOne();
+  const value1 = await producerConsumer.readOne();
 
   // const [value2] = producerConsumer.tryRead(100, 1);
  // can be written:
-  const value2 = producerConsumer.tryReadOne(100);
+  const value2 = await producerConsumer.tryReadOne(100);
   
   console.log(value1, value2); // 1 2
 }
@@ -386,6 +412,11 @@ A `ProducerConsumer` can be interrupted at any time.
 All awaiting _"threads"_ will then receive an exception:
 
 ```typescript
+import {
+  ConcurrencyInterruptedException,
+  ProducerConsumer
+} from "@heap-code/concurrency-synchronization";
+
 async function bootstrap() {
   const producerConsumer = new ProducerConsumer([1]);
 
@@ -393,7 +424,7 @@ async function bootstrap() {
 
   const succeed = await Promise.all([
     producerConsumer.read(3),
-    producerConsumer.readOne(2),
+    producerConsumer.readOne(),
     producerConsumer.tryRead(200, 3),
     producerConsumer.tryReadOne(200)
   ]).catch((error: unknown) => {
@@ -421,6 +452,8 @@ if it comes from _regular_ observable or [subjects](https://rxjs.dev/guide/subje
 So this difference can be omitted with the following:
 
 ```typescript
+import { ProducerConsumer } from "@heap-code/concurrency-synchronization";
+
 describe("My test", () => {
   it("should work", async () => {
     const producerConsumer = new ProducerConsumer();
