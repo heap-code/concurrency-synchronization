@@ -49,7 +49,7 @@ this package can easily be used in browsers like this:
 >
 > ```html
 > <script
->  src="https://cdn.jsdelivr.net/npm/@heap-code/concurrency-synchronization@0.0.0/dist/bundles/concurrency-synchronization.umd.min.js"
+>  src="https://cdn.jsdelivr.net/npm/@heap-code/concurrency-synchronization@0.4.0/dist/bundles/concurrency-synchronization.umd.min.js"
 >  type="application/javascript"
 > ></script>
 > ```

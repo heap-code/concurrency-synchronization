@@ -1,5 +1,17 @@
 # Changelog
 
+# [0.4.0](https://github.com/heap-code/concurrency-synchronization/compare/v0.3.0...v0.4.0) (2023-06-27)
+
+
+### Bug Fixes
+
+* **npm:** fix types path ([74f70ed](https://github.com/heap-code/concurrency-synchronization/commit/74f70ede37d7558d656fa67e6b9c39dfbb4feded))
+
+
+### Features
+
+* **cdn:** add UMD bundle ([882e433](https://github.com/heap-code/concurrency-synchronization/commit/882e43382d7c59c1a67b465b73c6cae587dfa79d)), closes [#7](https://github.com/heap-code/concurrency-synchronization/issues/7)
+
 # [0.3.0](https://github.com/heap-code/concurrency-synchronization/compare/v0.2.2...v0.3.0) (2023-06-26)
 
 
