@@ -9,6 +9,9 @@
 	"github": {
 		"release": true
 	},
+	"hooks": {
+		"after:bump": "npx ts-node tools/release-it/bump.after.ts"
+	},
 	"npm": {
 		"publish": true
 	},
