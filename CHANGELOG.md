@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/heap-code/concurrency-synchronization/compare/v1.0.0...v1.0.1) (2023-06-27)
+
+
+### Bug Fixes
+
+* **cdn:** add UMD to the global build command ([daf9f8a](https://github.com/heap-code/concurrency-synchronization/commit/daf9f8ab197c4190b07dd7fdd07a60c3074181ee))
+
 # [1.0.0](https://github.com/heap-code/concurrency-synchronization/compare/v0.4.0...v1.0.0) (2023-06-27)
 
 
