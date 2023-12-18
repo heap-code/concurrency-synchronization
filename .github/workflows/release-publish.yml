@@ -7,8 +7,8 @@ on:
 
 jobs:
   job:
-    # Ignore the heap-code bot commits
-    if: ${{ github.actor != vars.HC_BOT }}
+    # Ignore the heap-code bot commits and devDependencies
+    if: ${{ github.actor != vars.HC_BOT && !(github.actor == 'renovate[bot]' && contains(github.event.head_commit.message, 'chore(deps):')) }}
 
     runs-on: ubuntu-latest
     env:
