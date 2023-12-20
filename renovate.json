@@ -10,6 +10,12 @@
 			"matchPackageNames": ["@cspell/eslint-plugin", "@shopify/eslint-plugin"]
 		},
 		{
+			"groupName": "Release it",
+			"groupSlug": "release-it",
+			"matchPackageNames": ["release-it"],
+			"matchPackagePrefixes": ["@release-it/"]
+		},
+		{
 			"automerge": true,
 			"packagePatterns": ["*"]
 		}
