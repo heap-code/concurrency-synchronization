@@ -10,7 +10,10 @@ export class ConcurrencyInterruptedException extends ConcurrencyException {
 	 * @param reason The reason of the interruption
 	 * @param message An optional message for the exception
 	 */
-	public constructor(private readonly reason: unknown, message?: string) {
+	public constructor(
+		private readonly reason: unknown,
+		message?: string
+	) {
 		super(message);
 	}
 
